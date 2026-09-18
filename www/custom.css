@@ -1,6 +1,6 @@
 /* =============================================================================
    NOVO em Pernambuco — casca visual autoral, no mesmo padrao de
-   "Dashboard economia PE" (Gauss). :root = modo claro; [data-bs-theme="dark"]
+   "Dashboard economia PE". :root = modo claro; [data-bs-theme="dark"]
    = escuro — atributo que bslib::input_dark_mode() ja escreve no <html>,
    mesmo seletor usado nos overrides do leaflet mais abaixo.
 

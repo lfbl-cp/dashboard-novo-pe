@@ -1,6 +1,7 @@
 # =============================================================================
-# Checklist antes de publicar (Gauss / shinyapps.io / app Shiny local): mostra
-# quando cada camada de dado foi gerada pela ultima vez, num comando so.
+# Checklist antes de publicar (site estatico / shinyapps.io / app Shiny
+# local): mostra quando cada camada de dado foi gerada pela ultima vez, num
+# comando so.
 #
 # O projeto tem 3 publicacoes independentes do MESMO dado (ver README.md,
 # secao "Publicar") e nenhuma trava impede publicar uma delas com
@@ -32,7 +33,7 @@ t_dist <- mtime_mais_recente("dist")
 
 cat(sprintf("1. Cache bruto baixado do TSE/IBGE (data/raw/)....... %s\n", formatar(t_raw)))
 cat(sprintf("2. Pipeline processado (data/processed/)............. %s\n", formatar(t_processed)))
-cat(sprintf("3. Site estatico exportado (dist/, p/ Gauss)......... %s\n", formatar(t_dist)))
+cat(sprintf("3. Site estatico exportado (dist/)................... %s\n", formatar(t_dist)))
 
 dcf_shinyapps <- list.files("rsconnect/shinyapps.io", pattern = "\\.dcf$", recursive = TRUE, full.names = TRUE)
 if (length(dcf_shinyapps) > 0) {
@@ -42,9 +43,9 @@ if (length(dcf_shinyapps) > 0) {
 }
 
 if (file.exists("site.zip")) {
-  cat(sprintf("5. site.zip local (o que SERIA publicado no Gauss)... %s\n", formatar(file.info("site.zip")$mtime)))
+  cat(sprintf("5. site.zip local (o que SERIA publicado agora)...... %s\n", formatar(file.info("site.zip")$mtime)))
 } else {
-  cat("5. site.zip local..................................... (nao existe -- rode atualizar_site.R antes de publicar no Gauss)\n")
+  cat("5. site.zip local..................................... (nao existe -- rode atualizar_site.R antes de publicar o site estatico)\n")
 }
 
 cat("\n-- Leitura --\n")
@@ -53,14 +54,14 @@ if (!is.na(t_processed) && !is.na(t_raw) && t_processed < t_raw) {
   cat("          de consolidacao de novo (passos 05/11/16/17 no README).\n")
 }
 if (!is.na(t_dist) && !is.na(t_processed) && t_dist < t_processed) {
-  cat("[ATENCAO] dist/ é mais VELHO que data/processed/ -- o site estatico do\n")
-  cat("          Gauss ainda reflete dado antigo. Rode atualizar_site.R antes\n")
-  cat("          de subir o site.zip de novo.\n")
+  cat("[ATENCAO] dist/ é mais VELHO que data/processed/ -- o site estatico\n")
+  cat("          publicado ainda reflete dado antigo. Rode atualizar_site.R\n")
+  cat("          antes de subir o site.zip de novo.\n")
 }
 if (length(dcf_shinyapps) > 0 && !is.na(t_processed) && file.info(dcf_shinyapps[1])$mtime < t_processed) {
   cat("[ATENCAO] o ultimo deploy no shinyapps.io é mais VELHO que\n")
   cat("          data/processed/ -- rode rsconnect::deployApp() de novo.\n")
 }
 
-cat("\nDepois de publicar manualmente no Gauss (upload do site.zip, fora deste\n")
-cat("script), registre a data em DEPLOYS.md.\n")
+cat("\nDepois de publicar manualmente o site estatico (upload do site.zip, fora\n")
+cat("deste script), registre a data em DEPLOYS.md.\n")

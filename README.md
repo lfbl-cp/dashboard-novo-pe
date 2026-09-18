@@ -1,7 +1,7 @@
 # Dashboard NOVO em Pernambuco
 
 Dashboard Shiny com o desempenho eleitoral do partido NOVO em Pernambuco (eleições
-gerais de 2018 e 2022). 
+gerais de 2018 e 2022).
 
 A barra de filtro sticky tem o alternador **Eleições gerais / Eleições
 municipais** (nível mais alto do app). O filtro de **Ano** das eleições gerais
@@ -131,7 +131,7 @@ sincronia sozinhas depois de rodar o pipeline de novo:
 |---|---|---|
 | App Shiny local | Só rodar `shiny::runApp(".")` — sempre lê `data/processed/` direto do disco. | `data/processed/` |
 | shinyapps.io | `rsconnect::deployApp(appName = "Dashboard_Novo")` | `data/processed/` |
-| Site estático (Gauss) | `Rscript atualizar_site.R` (gera `dist/` + `site.zip`), depois subir `site.zip` manualmente em `gauss.indexps.xyz/admin/menus` (deletar o menu antigo antes) | `dist/`, que por sua vez vem de `data/processed/` |
+| Site estático (hospedagem externa) | `Rscript atualizar_site.R` (gera `dist/` + `site.zip`), depois subir `site.zip` manualmente no painel de hospedagem (apagar a versão antiga antes) | `dist/`, que por sua vez vem de `data/processed/` |
 
 **Antes de publicar qualquer uma das 3** (principalmente depois de rodar o
 pipeline de novo por causa de uma nova eleição ou correção de dado), rode:
@@ -147,8 +147,8 @@ dessincronia (uma das 3 versões com dado/código mais velho que as outras,
 sem nenhum erro visível) que já causou o dashboard parecer "sem dado
 nenhum" numa das versões enquanto as outras duas estavam certas.
 
-Depois de publicar no Gauss (o único dos 3 sem nenhum registro automático
-de quando foi feito), anote a data em [DEPLOYS.md](DEPLOYS.md).
+Depois de publicar o site estático (o único dos 3 sem nenhum registro
+automático de quando foi feito), anote a data em [DEPLOYS.md](DEPLOYS.md).
 
 ## Estrutura
 

@@ -40,8 +40,8 @@ passo a passo) e está documentado com todos os detalhes técnicos em
 1. **App Shiny** (`app.R`) — versão interativa completa, roda localmente em
    R (`shiny::runApp(".")`).
 2. **Site estático** (`dist/`) — a mesma análise exportada para
-   HTML/JS/JSON puro (sem precisar de um servidor R rodando), publicada no
-   painel Gauss. Gerado por `atualizar_site.R`.
+   HTML/JS/JSON puro (sem precisar de um servidor R rodando), publicada num
+   painel de hospedagem externo. Gerado por `atualizar_site.R`.
 
 ## Autoria
 
