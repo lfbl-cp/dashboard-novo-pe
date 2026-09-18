@@ -1,3 +1,8 @@
-programs/
-data/raw/
-data/intermediate/
+programs
+dist
+site.zip
+atualizar_site.bat
+atualizar_site.R
+checklist_deploy.R
+DEPLOYS.md
+SOBRE.md
