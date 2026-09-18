@@ -1,0 +1,32 @@
+# Cache de downloads brutos do TSE/IBGE (centenas de MB, reproduzivel
+# rodando o pipeline em programs/ -- ver README.md).
+data/raw/
+
+# Dado intermediario so usado pelo ETL (nunca pelo app em runtime) -- hoje so
+# perfil_eleitorado_secao.rds (~67MB, 13M+ linhas), gerado por
+# programs/15_coleta_perfil_eleitorado.R. Reproduzivel rodando o pipeline,
+# nao precisa (nem devia) ir pro historico de um repo publico.
+data/intermediate/
+
+# Estado de sessao/deploy especifico da maquina, nao do projeto.
+.Rhistory
+.RData
+.Rproj.user/
+rsconnect/
+
+# Logs de teste manual e build artifact (gerado por atualizar_site.R).
+app_run*.log
+site.zip
+
+# Dados TRATADOS, mas ainda assim artefato de build, nao fonte: tudo aqui e
+# reproduzivel rodando o pipeline em programs/ (ver README.md, secao "Como
+# rodar"), e muda a cada rodada do pipeline -- versionar isso so duplica o
+# mesmo dado (bruto -> processado -> exportado) 2-3x no historico do git a
+# cada atualizacao. Fora daqui: data/intermediate/ (uso exclusivo do ETL,
+# acima) e o codigo em R/, programs/, app.R (esses sim sao fonte).
+data/processed/
+
+# Site estatico exportado por programs/13_export_dist_data.R +
+# atualizar_site.R (inclui copia de www/fotos/ em dist/fotos/) -- mesmo
+# motivo do data/processed/ acima: build artifact, nao fonte.
+dist/

@@ -1,0 +1,564 @@
+/* =============================================================================
+   NOVO em Pernambuco — casca visual autoral, no mesmo padrao de
+   "Dashboard economia PE" (Gauss). :root = modo claro; [data-bs-theme="dark"]
+   = escuro — atributo que bslib::input_dark_mode() ja escreve no <html>,
+   mesmo seletor usado nos overrides do leaflet mais abaixo.
+
+   Tokens de tipografia e espacamento abaixo consolidam valores que antes
+   apareciam soltos e ligeiramente diferentes pelo arquivo pro mesmo papel
+   visual (ex.: rotulo embaixo de um numero grande tinha 0.78rem num lugar e
+   0.82rem em outro) -- usar sempre os tokens evita esse tipo de deriva.
+   ============================================================================= */
+
+:root {
+  --page-plane:    #f9f9f7;
+  --surface-1:     #fcfcfb;
+  --text-primary:  #0b0b0b;
+  --text-secondary:#52514e;
+  --text-muted:    #898781;
+  --gridline:      #e1e0d9;
+  --baseline:      #c3c2b7;
+  --border:        rgba(11,11,11,0.10);
+  --delta-good:      #006300;
+  --delta-bad:       #e34948;
+  --status-pendente: #2563A8; /* "suplente" -- precisa de uma cor de STATUS propria, nao o --accent (marca/interacao), senao fica ambiguo se o badge esta comunicando situacao eleitoral ou so reaproveitando a cor do partido */
+  --accent:          #FF6A13;
+  --leaflet-ctrl-bg:   #ffffff;
+  --leaflet-ctrl-text: #333333;
+
+  /* Escala tipografica -- 8 passos cobrem todo o dashboard. Cada token e um
+     PAPEL (ex.: "rotulo em caixa alta", "legenda embaixo de numero"), nao um
+     tamanho arbitrario: 2 elementos com o mesmo papel usam sempre o mesmo
+     token, mesmo que estejam em componentes diferentes. */
+  --font-2xs:  0.72rem;  /* legenda do mapa, badge de situacao */
+  --font-xs:   0.76rem;  /* rotulo em caixa alta (titulo de bloco/painel, cabecalho de tabela) */
+  --font-sm:   0.82rem;  /* legenda embaixo de numero, pill pequena */
+  --font-base: 0.88rem;  /* corpo padrao (avisos, grid de dados, tabela) */
+  --font-md:   1rem;     /* nome/titulo de item de lista */
+  --font-lg:   1.3rem;   /* titulo da pagina, avatar sem foto */
+  --font-xl:   1.6rem;   /* titulo de secao */
+  --font-2xl:  1.9rem;   /* numero grande de destaque (KPI, stat de perfil) */
+
+  /* Escala de espacamento -- idem, um token por PAPEL de espaco (nao por
+     valor em si), reaproveitado em qualquer componente que precise da mesma
+     folga. */
+  --space-1:  4px;
+  --space-2:  6px;
+  --space-3:  8px;
+  --space-4:  10px;
+  --space-5:  12px;
+  --space-6:  14px;
+  --space-7:  16px;
+  --space-8:  20px;
+  --space-9:  24px;
+  --space-10: 40px;
+  --space-11: 64px;
+}
+[data-bs-theme="dark"] {
+  --page-plane:    #0d0d0d;
+  --surface-1:     #1a1a19;
+  --text-primary:  #ffffff;
+  --text-secondary:#c3c2b7;
+  --text-muted:    #898781;
+  --gridline:      #2c2c2a;
+  --baseline:      #383835;
+  --border:        rgba(255,255,255,0.10);
+  --delta-good:      #0ca30c;
+  --delta-bad:       #e66767;
+  --status-pendente: #5B9BE0;
+  --accent:          #FF9800;
+
+  /* Overrides pontuais do leaflet no escuro (controles de canto) usavam hex
+     direto antes de virar token -- fica junto dos outros tokens do tema
+     escuro, nao mais solto no fim do arquivo. */
+  --leaflet-ctrl-bg: #21242b;
+  --leaflet-ctrl-text: #E7E7E7;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--page-plane);
+  color: var(--text-primary);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+/* ── Casca ─────────────────────────────────────────────────────────────── */
+
+.app-shell { min-height: 100vh; }
+
+.app-header {
+  padding: var(--space-7) var(--space-10);
+  border-bottom: 1px solid var(--border);
+}
+.app-header-inner {
+  max-width: 1320px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.app-header h1 {
+  font-size: var(--font-lg);
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.filtro-bar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--page-plane);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(6px);
+}
+.filtro-bar-inner {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-10);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+}
+
+/* ── Alternador Eleicoes gerais / municipais ──────────────────────────────
+   Reaproveita radioButtons (mesmo idioma ja usado no Coropletico/LISA de
+   cada mapa), mas estilizado como controle segmentado (pill preenchida
+   quando ativa) em vez do radio pequeno padrao -- e a navegacao de nivel
+   mais alto do app inteiro, precisa de mais peso visual que uma opcao de
+   mapa. O <input> fica visualmente oculto (nao display:none, pra manter
+   foco/teclado/leitor de tela funcionando) e o estado ativo e comunicado
+   pelo :has() no <label> que o envolve. */
+.visao-toggle .shiny-options-group {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: 0;
+}
+/* NULL como label do radioButtons ainda gera um <label class="control-label">
+   vazio (Shiny sempre emite a tag, so que sem texto) -- sem esse escopo, o
+   seletor de pill abaixo estilizava ele tambem, virando uma pilula fantasma
+   em branco antes das opcoes de verdade. Remove de vez. */
+.visao-toggle .control-label { display: none; }
+/* radioButtons(inline = TRUE) poe a classe "radio-inline" direto no <label>
+   (nao numa div envolvendo ele) -- o <label> em si e o item da pill. O
+   margin:0 zera o espacamento padrao do Bootstrap entre radios inline (o
+   gap do flex acima ja cuida do espaco entre pills). */
+.visao-toggle .radio-inline {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  padding: var(--space-2) var(--space-6);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--surface-1);
+  cursor: pointer;
+  margin: 0;
+}
+.visao-toggle input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.visao-toggle .radio-inline:has(input:checked) {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+}
+
+.app-main {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: var(--space-3) var(--space-10) var(--space-11);
+}
+
+@media (max-width: 720px) {
+  .app-header, .filtro-bar-inner, .app-main { padding-left: var(--space-7); padding-right: var(--space-7); }
+}
+
+/* ── Secao (uma por cargo) ────────────────────────────────────────────── */
+
+.secao {
+  padding-top: var(--space-10);
+  margin-top: var(--space-9);
+  border-top: 1px solid var(--border);
+  scroll-margin-top: 140px; /* cabecalho + barra de filtro sticky (~136px medido), pro anchor nao ficar escondido */
+}
+.secao:first-child { border-top: none; margin-top: var(--space-3); }
+
+.secao h2 {
+  font-size: var(--font-xl);
+  font-weight: 700;
+  margin: 0 0 var(--space-3);
+  color: var(--text-primary);
+}
+
+.secao-atalhos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-7);
+  margin-bottom: var(--space-8);
+}
+.secao-atalhos a { color: var(--text-secondary); }
+
+/* Titulo de bloco (Visao do partido / Visao por candidato) precisa de MENOS
+   folga acima do que uma secao inteira (.secao acima, --space-9 = 24px) --
+   e uma quebra hierarquicamente menor, entao o espaco tem que ser menor,
+   nao maior (era 28px antes, mais que a propria secao -- invertia a
+   hierarquia visual). */
+.bloco-titulo {
+  font-size: var(--font-xs);
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: var(--space-8) 0 var(--space-5);
+  scroll-margin-top: 140px; /* mesma folga do .secao, pro anchor nao ficar escondido sob a barra sticky */
+}
+
+/* Tela cheia de "em construcao" (visao Eleicoes municipais) -- diferente do
+   .aviso-vazio (faixa fina de aviso dentro de uma secao com dado): aqui e o
+   conteudo inteiro da visao, entao pede um estado vazio centralizado, nao
+   uma faixa. */
+.aviso-vazio {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  padding: var(--space-4) var(--space-6);
+  margin-bottom: var(--space-7);
+  font-size: var(--font-base);
+  color: var(--text-secondary);
+}
+
+/* ── Pill (componente compartilhado) ─────────────────────────────────────
+   Forma base (raio 20px) reaproveitada por 3 usos que antes tinham blocos
+   CSS quase identicos escritos em momentos diferentes: atalho de navegacao
+   da secao, link de rede social do perfil, e badge de situacao do perfil.
+   Os 2 primeiros sao LINKS (mesma borda, mesmo padding, mesmo hover); a cor
+   de texto de cada um fica declarada a parte porque e uma diferenca de
+   enfase intencional (atalho de navegacao e cromo secundario, rede social e
+   conteudo). O badge de situacao NAO e um link (sem borda, preenchido, sem
+   interacao), entao tem seu proprio bloco -- mas reaproveita os mesmos
+   tokens de espaco/fonte da escala, nao valores proprios. ── */
+
+.secao-atalhos a,
+.secao-atalhos select,
+.perfil-rede-pill {
+  display: inline-block;
+  border-radius: 20px;
+  font-size: var(--font-sm);
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid var(--border);
+  padding: var(--space-1) var(--space-5);
+  background: var(--page-plane);
+}
+.secao-atalhos a:hover,
+.secao-atalhos select:hover,
+.perfil-rede-pill:hover { color: var(--accent); border-color: var(--accent); }
+
+/* O filtro de Ano (selectInput em secao_ui()) e um <select> de verdade
+   dentro do atalhos, nao um link -- precisa de alguns ajustes que os <a> nao
+   precisam: o .form-group que o Shiny envolve em volta do <select> vira mais
+   um item da linha flex (sem a margem/label padrao do Bootstrap), o select
+   perde o width:100% que .form-select aplica por padrao (senao estoura a
+   largura da pill pro tamanho do container), e cursor/estado de foco casam
+   com o resto dos controles do dashboard. */
+.secao-atalhos .form-group { margin-bottom: 0; }
+.secao-atalhos select {
+  width: auto;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.secao-atalhos select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 0.15rem rgba(255, 106, 19, 0.18);
+}
+
+.perfil-badge {
+  display: inline-block;
+  border-radius: 20px;
+  font-size: var(--font-2xs);
+  font-weight: 700;
+  padding: 2px var(--space-3);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+/* ── KPIs ──────────────────────────────────────────────────────────────── */
+
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-7);
+  margin-bottom: var(--space-8);
+}
+.kpi-row--4 { grid-template-columns: repeat(4, 1fr); }
+.kpi-row--5 { grid-template-columns: repeat(5, 1fr); }
+
+.kpi-tile {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: var(--space-7);
+}
+.kpi-valor {
+  font-size: var(--font-2xl);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  line-height: 1.15;
+}
+.kpi-valor.kpi-delta--pos { color: var(--delta-good); }
+.kpi-valor.kpi-delta--neg { color: var(--delta-bad); }
+.kpi-rotulo {
+  font-size: var(--font-sm);
+  color: var(--text-muted);
+  margin-top: var(--space-1);
+}
+
+@media (max-width: 900px) {
+  .kpi-row--4 { grid-template-columns: repeat(2, 1fr); }
+  .kpi-row--5 { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 720px) {
+  .kpi-row { grid-template-columns: 1fr; }
+  .kpi-row--4 { grid-template-columns: 1fr; }
+  .kpi-row--5 { grid-template-columns: 1fr; }
+}
+
+/* ── Paineis (mapa, ranking, votos por eleicao) ──────────────────────────── */
+
+.painel {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: var(--space-7);
+  overflow: hidden;
+}
+.painel-titulo {
+  font-size: var(--font-xs);
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin: 0 0 var(--space-4);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.painel-titulo-linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-7);
+}
+.painel-titulo-linha .painel-titulo { margin-bottom: 0; }
+.painel-titulo-linha .shiny-options-group { margin-bottom: var(--space-4); }
+
+/* minmax(0, ...) e obrigatorio aqui -- um "1fr" puro tem largura MINIMA
+   implicita igual ao min-content do conteudo (o grafico do ranking, que e uma
+   imagem/plot com largura intrinseca propria). Sem o minmax, o grafico "estoura"
+   a coluna dele pra caber, empurrando a coluna do mapa e quebrando a proporcao
+   1.6fr:1fr (foi exatamente esse bug que fez o mapa ficar pequeno e o grafico
+   grande demais na Visao por candidato). */
+.mapa-ranking-par {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: var(--space-7);
+  margin-bottom: var(--space-7);
+}
+@media (max-width: 900px) {
+  .mapa-ranking-par { grid-template-columns: 1fr; }
+}
+
+/* Perfil do eleitorado: rosca (genero) + 2 radares (faixa etaria,
+   escolaridade) sempre visiveis lado a lado dentro do mesmo painel, cada um
+   ocupando a mesma largura de coluna (minmax(0,...) pelo mesmo motivo do
+   .mapa-ranking-par acima). */
+.painel-perfil-eleitorado { margin-bottom: var(--space-7); }
+.perfil-eleitorado-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-7);
+}
+@media (max-width: 900px) {
+  .perfil-eleitorado-grid { grid-template-columns: 1fr; }
+}
+.perfil-eleitorado-item-titulo {
+  font-size: var(--font-2xs);
+  font-weight: 600;
+  text-align: center;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: var(--space-2);
+}
+
+/* Bloco 2 (Visao por candidato): a coluna da direita do .mapa-ranking-par nao
+   e so o ranking, e perfil+ranking empilhados. O grid (align-items:stretch,
+   o padrao) ja estica .lateral-candidato pra igualar a altura natural do
+   .painel-mapa ao lado (~503px medido -- o mapa em si e fixo em 420px, o
+   resto e titulo+padding do painel). Perfil e ranking dentro dela usam altura
+   FIXA em vez de flex-grow: uma 1a tentativa com plotOutput(height="100%") +
+   flex quebrou (altura % de filho de flex-grow entra em dependencia circular
+   com o proprio calculo do flex, o grafico "puxava" um tamanho grande demais
+   e espremia o perfil a quase zero). overflow-y:auto no perfil continua como
+   rede de seguranca pro caso raro de um candidato com fatos/redes demais.
+   Nota: .painel-perfil e .painel-ranking aqui sao ambos filhos diretos de
+   .lateral-candidato -- o 1o vem de dentro de um uiOutput() sem classe
+   propria, entao os seletores miram a classe do painel renderizado dentro
+   dele, nao um item de flex por si so (por isso altura fixa, nao flex). */
+.lateral-candidato {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+.lateral-candidato .painel-perfil {
+  height: 248px;
+  overflow-y: auto;
+}
+
+.votos-eleicao-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-7);
+}
+.votos-eleicao-row .kpi-tile { flex: 1 1 160px; }
+
+/* O leaflet da z-index:1000 aos controles de canto (zoom, legenda) -- sem
+   isolamento isso vaza pra fora do painel e sobrepoe a barra de filtro
+   sticky (z-index:20) quando o mapa passa por tras dela na rolagem. */
+.painel-mapa { isolation: isolate; }
+.painel-mapa .leaflet-container { border-radius: 6px; }
+
+.mapa-legenda-ctrl { margin: var(--space-3) !important; }
+.mapa-legenda {
+  min-width: 148px;
+  font-size: var(--font-2xs);
+  line-height: 1.3;
+  background: var(--surface-1);
+  color: var(--text-primary);
+  padding: var(--space-3) var(--space-4);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+}
+.mapa-legenda-titulo { font-weight: 700; margin-bottom: var(--space-2); }
+.mapa-legenda-barra { height: 10px; border-radius: 3px; margin-bottom: var(--space-1); }
+.mapa-legenda-rotulos { display: flex; justify-content: space-between; font-variant-numeric: tabular-nums; }
+.mapa-legenda-item { display: flex; align-items: center; gap: var(--space-2); margin-top: 3px; }
+.mapa-legenda-swatch { width: 10px; height: 10px; border-radius: 2px; flex: 0 0 auto; }
+
+/* ── Controles (Bootstrap) — retoque pra bater com os tokens ───────────── */
+
+.form-select, .form-control {
+  background-color: var(--surface-1);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+.form-select:focus, .form-control:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 0.2rem rgba(255, 106, 19, 0.18);
+}
+label { color: var(--text-secondary); }
+
+/* ── Ficha do municipio (modal) ──────────────────────────────────────────── */
+
+.ficha-tabela { width: 100%; border-collapse: collapse; }
+.ficha-tabela th {
+  text-align: left;
+  font-size: var(--font-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+  padding: var(--space-1);
+  border-bottom: 1px solid var(--border);
+}
+.ficha-tabela td {
+  padding: var(--space-3) var(--space-1);
+  border-bottom: 1px solid var(--border);
+  font-size: var(--font-base);
+  vertical-align: top;
+}
+.ficha-rotulo { color: var(--text-secondary); font-weight: 600; white-space: nowrap; }
+.ficha-valor { text-align: right; font-weight: 600; color: var(--text-primary); white-space: nowrap; }
+
+/* ── Card de perfil de candidato (Bloco 2) ───────────────────────────────────
+   Compacto de proposito -- divide os mesmos 420px de altura do mapa com o
+   ranking (.lateral-candidato em custom.css), entao nao ha espaco pra uma
+   grade de demografia larga: cabecalho pequeno, stat inline, fatos numa
+   linha corrida em vez de grade rotulo/valor. ── */
+
+.painel-perfil .painel-titulo { margin-bottom: var(--space-2); }
+
+.perfil-cabecalho {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+.perfil-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+.perfil-avatar--fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: var(--font-base);
+}
+.perfil-nome { font-weight: 700; font-size: var(--font-base); color: var(--text-primary); margin-bottom: var(--space-1); }
+
+.perfil-badge--eleito { background: color-mix(in srgb, var(--delta-good) 15%, transparent); color: var(--delta-good); }
+.perfil-badge--suplente { background: color-mix(in srgb, var(--status-pendente) 15%, transparent); color: var(--status-pendente); }
+.perfil-badge--nao-eleito { background: var(--gridline); color: var(--text-secondary); }
+
+.perfil-stat-inline {
+  font-size: var(--font-base);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-2);
+}
+.perfil-stat-inline strong { font-size: var(--font-md); color: var(--text-primary); font-variant-numeric: tabular-nums; }
+
+.perfil-fatos {
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  line-height: 1.35;
+  margin-bottom: var(--space-2);
+}
+
+.perfil-redes { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+.perfil-rede-pill { color: var(--text-primary); }
+/* Pills menores aqui (nao no atalho de navegacao, que reaproveita a mesma
+   classe base) -- a coluna do perfil e estreita (1fr de um grid 1.6fr:1fr) e
+   precisa caber ate 4-5 redes sociais numa unica linha pra nao estourar a
+   altura que o perfil divide com o ranking. */
+.perfil-redes .perfil-rede-pill { font-size: var(--font-2xs); padding: 2px var(--space-4); }
+
+/* ── Leaflet: controles tem fundo branco fixo por padrao — destoa no escuro ── */
+
+.leaflet-control,
+.leaflet-bar,
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background-color: var(--leaflet-ctrl-bg);
+  color: var(--leaflet-ctrl-text);
+}
+.leaflet-control a {
+  background-color: var(--leaflet-ctrl-bg);
+  color: var(--leaflet-ctrl-text);
+}
