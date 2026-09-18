@@ -12,3 +12,5 @@ checklist_deploy.R` — ver README.md, seção "Publicar".
 | Data | O que mudou | Publicado onde |
 |------|-------------|-----------------|
 | (preencher) | Registro começa a partir de agora — publicações anteriores (site estático, shinyapps.io) não têm data confirmada aqui | — |
+| 2026-09-18 | Pré-cálculo da composição do eleitorado (`programs/17`, corrige ~40s de tela em branco) + correção do `.rscignore` (bundle de deploy caiu de 550MB pra 11MB) | shinyapps.io |
+| (preencher) | Mesma atualização acima | site estático — **subir `site.zip` manualmente e completar esta linha** |
