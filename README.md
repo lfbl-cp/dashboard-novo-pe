@@ -1,10 +1,7 @@
 # Dashboard NOVO em Pernambuco
 
 Dashboard Shiny com o desempenho eleitoral do partido NOVO em Pernambuco (eleições
-gerais de 2018 e 2022). Segue o padrão de projeto do Gauss usado em
-"Dashboard economia PE": `app.R` único + `R/` (código de runtime do app) +
-`programs/` (ETL numerado, roda fora do app) + `data/raw` e `data/processed` +
-`www/custom.css` com tema claro/escuro via custom properties.
+gerais de 2018 e 2022). 
 
 A barra de filtro sticky tem o alternador **Eleições gerais / Eleições
 municipais** (nível mais alto do app). O filtro de **Ano** das eleições gerais
